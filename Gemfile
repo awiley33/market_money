@@ -14,6 +14,7 @@ gem "puma", "~> 5.0"
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 # gem "jbuilder"
+gem "jsonapi-serializer"
 
 # Use Redis adapter to run Action Cable in production
 # gem "redis", "~> 4.0"
@@ -47,4 +48,7 @@ group :development do
   gem "pry"
 end
 
-gem 'simplecov', require: false, group: :test
+group :test do
+  gem 'simplecov', require: false
+  gem 'shoulda-matchers', '~> 5.0'
+end
