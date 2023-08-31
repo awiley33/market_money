@@ -6,6 +6,22 @@ describe "Markets API" do
     @market_1 = Market.all[0]
     @market_2 = Market.all[1]
     @market_3 = Market.all[2]
+
+    create_list(:vendor, 6)
+    @vendor_1 = Vendor.all[0]
+    @vendor_2 = Vendor.all[1]
+    @vendor_3 = Vendor.all[2]
+    @vendor_4 = Vendor.all[3]
+    @vendor_5 = Vendor.all[4]
+    @vendor_6 = Vendor.all[5]
+
+    MarketVendor.create!(market_id: @market_1.id, vendor_id: @vendor_1.id)
+    MarketVendor.create!(market_id: @market_1.id, vendor_id: @vendor_2.id)
+    MarketVendor.create!(market_id: @market_1.id, vendor_id: @vendor_3.id)
+    MarketVendor.create!(market_id: @market_1.id, vendor_id: @vendor_4.id)
+    MarketVendor.create!(market_id: @market_2.id, vendor_id: @vendor_4.id)
+    MarketVendor.create!(market_id: @market_2.id, vendor_id: @vendor_6.id)
+
   end
 
   it "sends a list of markets" do
@@ -89,9 +105,12 @@ describe "Markets API" do
         expect(market[:data][:attributes][:vendor_count]).to be_an(Integer)
     end
 
-    it "returns an error message with an invalid id" do
-      get "/api/v0/markets/123123123123123123"
-      
+    xit "returns an error message with an invalid id" do
+      id = 123123123123123
+      get "/api/v0/markets/#{id}"
+
+      expect(response).to be_successful
+      expect{Market.find(id)}.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
 end
