@@ -68,4 +68,29 @@ describe "MarketVendors API" do
       expect(data[:errors].first[:title]).to eq("Couldn't find Market with 'id'=123123123123")
     end
   end
+
+  describe "create a MarketVendor" do
+    it "" do
+      headers = {"CONTENT_TYPE" => "application/json"}
+      params = {
+                "market_id": @market_1.id,
+                "vendor_id": @vendor_5.id
+              }
+
+      post "/api/v0/market_vendors", headers: headers, params: params, as: :json
+
+      market_vendor = MarketVendor.last
+      expect(response).to be_successful
+      expect(response.status).to eq(201)
+
+      expect(market_vendor.market_id).to eq(params[:market_id])
+      expect(market_vendor.vendor_id).to eq(params[:vendor_id])
+        
+      # get "/api/v0/markets/#{@market_1.id}/vendors"
+
+      # vendors = JSON.parse(response.body, symbolize_names: true)
+
+      # expect(vendors).to include(@vendor_5.name)
+    end
+  end
 end

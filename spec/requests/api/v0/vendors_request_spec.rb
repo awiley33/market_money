@@ -1,19 +1,11 @@
 require "rails_helper"
 
 describe "Vendors API" do
-  before do
-    create_list(:vendor, 6)
-    @vendor_1 = Vendor.all[0]
-    @vendor_2 = Vendor.all[1]
-    @vendor_3 = Vendor.all[2]
-    @vendor_4 = Vendor.all[3]
-    @vendor_5 = Vendor.all[4]
-    @vendor_6 = Vendor.all[5]
-  end
-
   describe "get one vendor" do
     it "returns JSON object with attrs if valid id is passed" do
-      get "/api/v0/vendors/#{@vendor_1.id}"
+      vendor = create(:vendor)
+
+      get "/api/v0/vendors/#{vendor.id}"
 
       expect(response).to be_successful
       
@@ -39,11 +31,16 @@ describe "Vendors API" do
     end
 
     it "returns 404 status and descriptive error message if invalid id is passed" do
-      id = 123123123123123
+      id = 123123123123
       get "/api/v0/vendors/#{id}"
 
       expect(response.status).to eq(404)
       expect{Vendor.find(id)}.to raise_error(ActiveRecord::RecordNotFound)
+
+      data = JSON.parse(response.body, symbolize_names: true)
+
+      expect(data[:errors].first[:status]).to eq("404")
+      expect(data[:errors].first[:title]).to eq("Couldn't find Vendor with 'id'=123123123123")
     end
   end
 
@@ -143,6 +140,33 @@ describe "Vendors API" do
       expect(data[:errors]).to be_an(Array)
       expect(data[:errors].first[:status]).to eq("400")
       expect(data[:errors].first[:title]).to eq("Validation failed: Contact name can't be blank")
+    end
+  end
+
+  describe "delete a vendor" do
+    it "will destroy the vendor, as well as any associations that vendor had, and return a 204 status code" do
+    vendor = create(:vendor)
+    id = vendor.id
+    expect{ delete "/api/v0/vendors/#{vendor.id}" }.to change(Vendor, :count).by(-1)
+
+    delete "/api/v0/vendors/#{vendor.id}"
+    
+    expect{Vendor.find(id)}.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    it "will raise a 404 error when invalid id is passed in" do
+      id = 123123123123
+
+      delete "/api/v0/vendors/#{id}"
+
+      expect(response).to_not be_successful
+      expect(response).to have_http_status(404)
+
+      data = JSON.parse(response.body, symbolize_names: true)
+
+      expect(data[:errors]).to be_an(Array)
+      expect(data[:errors].first[:status]).to eq("404")
+      expect(data[:errors].first[:title]).to eq("Couldn't find Vendor with 'id'=123123123123")
     end
   end
 end
