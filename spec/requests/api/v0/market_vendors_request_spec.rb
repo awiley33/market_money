@@ -28,6 +28,8 @@ describe "MarketVendors API" do
       get "/api/v0/markets/#{@market_1.id}/vendors"
 
       expect(response).to be_successful
+      expect(response).to have_http_status(200)
+
       
       vendors = JSON.parse(response.body, symbolize_names: true)
 
@@ -52,8 +54,18 @@ describe "MarketVendors API" do
       end
     end
     
-    xit "returns an error message when invalid id passed" do
+    it "returns an error message when invalid id passed" do
+      id = 123123123123
+      get "/api/v0/markets/#{id}/vendors"
 
+      expect(response).to_not be_successful
+      expect(response.status).to eq(404)
+      
+      data = JSON.parse(response.body, symbolize_names: true)
+
+      expect(data[:errors]).to be_an(Array)
+      expect(data[:errors].first[:status]).to eq("404")
+      expect(data[:errors].first[:title]).to eq("Couldn't find Market with 'id'=123123123123")
     end
   end
 end

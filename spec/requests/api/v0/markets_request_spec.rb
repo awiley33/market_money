@@ -71,6 +71,8 @@ describe "Markets API" do
       get "/api/v0/markets/#{@market_1.id}"
       
       expect(response).to be_successful
+      expect(response).to have_http_status(200)
+
       
       market = JSON.parse(response.body, symbolize_names: true)
 
@@ -105,12 +107,21 @@ describe "Markets API" do
         expect(market[:data][:attributes][:vendor_count]).to be_an(Integer)
     end
 
-    xit "returns an error message with an invalid id" do
-      id = 123123123123123
+    it "returns an error message when invalid id is passed" do
+      id = 123123123123
       get "/api/v0/markets/#{id}"
 
-      expect(response).to be_successful
-      expect{Market.find(id)}.to raise_error(ActiveRecord::RecordNotFound)
+      expect(response).to_not be_successful
+      expect(response.status).to eq(404)
+      
+      data = JSON.parse(response.body, symbolize_names: true)
+
+      expect(data[:errors]).to be_an(Array)
+      expect(data[:errors].first[:status]).to eq("404")
+      expect(data[:errors].first[:title]).to eq("Couldn't find Market with 'id'=123123123123")
     end
   end
 end
+
+
+# expect{Market.find(id)}.to raise_error(ActiveRecord::RecordNotFound)
